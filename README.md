@@ -96,3 +96,58 @@ Je begint dus nooit opnieuw. Elke opdracht bouwt verder op de vorige.
 Je hebt hem gemaakt vanaf het sjabloon, dus dit is jouw kopie. Werk erin, commit
 elke les, en push. Indienen doe je met de link naar een commit. Hoe dat precies
 gaat, staat in de opdrachtbundel op Toledo.
+
+## Het stappeplan: Storingsmelder in containers
+
+De app draait in 2 containers: de app zelf (`web`) en een PostgreSQL-database (`db`). Alles start met één commando en de data overleeft een herstart.
+
+### Starten vanaf het begin
+
+nodig: Docker Desktop (met Docker Compose) en Git.
+En daarna die de commando's hieronder
+
+```
+git clone https://github.com/AxS-UCLL/cloud-computing.git
+cd cloud-computing
+copy .env.example .env
+```
+
+Dan Open je `.env` en vul de drie waarden in, bijvoorbeeld:
+
+```
+POSTGRES_USER=storing
+POSTGRES_PASSWORD=kies-een-wachtwoord
+POSTGRES_DB=storingsmelder
+```
+
+dan starten
+
+```
+docker compose up -d --build
+```
+
+Open daarna http://localhost:8000. Controleer de status met `docker compose ps` (de database staat op `healthy`) en `http://localhost:8000/health` (opslag: PostgreSQL).
+
+Stoppen:
+
+```
+docker compose down      # containers weg, data blijft bewaard
+docker compose down -v   # containers én volumes weg, data is weg
+```
+
+### Wat er in de repo zit
+
+- `Dockerfile`: bouwt de applicatie op `python:3.14-slim`
+- `compose.yaml`: app en database samen, met volumes, healthcheck en `depends_on`
+- `.dockerignore`: houdt `.git`, `.env` en databasebestanden uit het image
+- `.env.example`: de namen van de instellingen, zonder waarden
+- `.env` staat niet in de repo, want daar staat het wachtwoord in
+
+### Het image op ghcr.io
+
+Het image staat publiek op de GitHub Container Registry
+om aaan de image te geraken doe je het comando dat hier onder staat.
+
+```
+docker pull ghcr.io/axs-ucll/storingsmelder:1.0
+````
